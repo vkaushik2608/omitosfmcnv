@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:oraclehcmcloud="http://www.mulesoft.org/schema/mule/oraclehcmcloud" xmlns:oracle-ebs122="http://www.mulesoft.org/schema/mule/oracle-ebs122" xmlns:oracleerpcloud="http://www.mulesoft.org/schema/mule/oracleerpcloud" xmlns:sfdc-marketing-cloud="http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud http://www.mulesoft.org/schema/mule/sfdc-marketing-cloud/current/mule-sfdc-marketing-cloud.xsd
+http://www.mulesoft.org/schema/mule/oracleerpcloud http://www.mulesoft.org/schema/mule/oracleerpcloud/current/mule-oracleerpcloud.xsd
+http://www.mulesoft.org/schema/mule/oracle-ebs122 http://www.mulesoft.org/schema/mule/oracle-ebs122/current/mule-oracle-ebs122.xsd
+http://www.mulesoft.org/schema/mule/oraclehcmcloud http://www.mulesoft.org/schema/mule/oraclehcmcloud/current/mule-oraclehcmcloud.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="04867963-d577-43f6-aad8-7f99ee07f11b" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="8fbd3c00-40bb-413b-bf75-50d447ad0b61" >
+		<db:my-sql-connection host="sql6.freesqldatabase.com" port="3306" user="sql6446637" password="ERgQNBk5Xr" database="sql6446637" />
+	</db:config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="09f0ca9c-252f-401c-ae8e-d766f0552dab" >
+		<salesforce:basic-connection username="nikithashetty@apisero.com" password="Kajal1234@" securityToken="Sx4aPuinec7ouHro1nzfzeHD0" />
+	</salesforce:sfdc-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6d489670-4291-4ef2-8c7c-bc727be436c4">
+		<http:request-connection port="8081" host="localhost"/>
+	</http:request-config>
+	<flow name="SchedulerFlow" doc:id="f8ba68f4-ed10-44f4-9a00-9a234b908b4d" >
+		<scheduler doc:name="Store_Scheduler" doc:id="e240bba4-1c18-41aa-87c3-e6ea911a107d" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<os:store doc:name="StoreDateOfScheduler" doc:id="53fb2282-1a46-4129-a0ac-6538de69e7ba" key="DateOfScheduler">
+			<os:value ><![CDATA[#[now() as Date]]]></os:value>
+		</os:store>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ff2b9caa-e04a-4111-a1fe-1025a65b0d2f" type="ANY">
+				<set-payload value="#[payload]" doc:name="Store_Set Payload" doc:id="ae98e64a-4cb6-46e1-9fe7-2b8d314bc03c" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="OIMtoSFMCFlow" doc:id="442e253b-e0d5-48e9-a3d8-4e530e307b8f" >
+		<scheduler doc:name="OIMtoSFMC" doc:id="bb54d1cc-37b3-4a40-9239-810d28195ddd" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<flow-ref doc:name="GetDataFromMySQL" doc:id="3cc36978-6deb-4937-8235-de945d8bad72" name="GetDataFromMySQL"/>
+		<ee:transform doc:name="OIMtoSFMC transform" doc:id="47d4bae5-df03-4384-b6e6-e81ce2d5c28a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="OIMtoSFMC variable" doc:id="3c9efe0c-439e-4f32-b3e6-7ade3abf6cd0" variableName="PayloadFromMySQL" />
+		<os:retrieve doc:name="RetrieveDateOfScheduler" doc:id="740d228c-0fa7-4cd6-b1e4-fe7f75b3ad24" key="DateOfScheduler">
+			<os:default-value><![CDATA["No"]]></os:default-value>
+		</os:retrieve>
+		<set-variable value="#[payload]" doc:name="OIMoSFMC" doc:id="e1170045-8630-4024-adf6-c67bf412eab6" variableName="LastRunSchedulerDate" />
+		<foreach doc:name="For Each" doc:id="e861932a-e760-4fc2-815d-c4922a7d218e" collection="#[vars.PayloadFromMySQL]">
+			<choice doc:name="Choice" doc:id="0f81fc32-f642-4915-ac48-573560013e40">
+			<when expression='#[payload.LastUpdatedDate as String &lt; vars.LastRunSchedulerDate as String default ""]'>
+				<set-payload value="#[vars.PayloadFromMySQL]" doc:name="OIMtoSFMCpayload" doc:id="25f6627b-4b9a-4aa7-a4a2-cc39176bc7c5" />
+				<http:request method="POST" doc:name="SFMCrequest" doc:id="be12017e-ed1d-4b3b-abff-64b500be3d18" config-ref="HTTP_Request_configuration" path="/SFMC" responseTimeout="50000">
+				</http:request>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="OIMtoSFMClogger" doc:id="00d8487f-4512-43de-8923-a4815934b549" message="No Data" />
+			</otherwise>
+		</choice>
+		</foreach>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="dcc3ab91-1fcd-403d-bd4c-183c9dc499b1" type="ANY">
+				<set-payload value="#[vars.payload]" doc:name="OIMtoSFMC payload" doc:id="bd26f6d1-e7ec-4980-8196-cad849e6d39d" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="GetDataFromMySQL" doc:id="592804ae-e349-46d4-94be-d80974d825ac" >
+		<http:listener doc:name="GetDataFromMYSQL" doc:id="8a0e1046-474b-4fe2-a860-b9ab8bbbd79b" config-ref="HTTP_Listener_config" path="/mysqlData"/>
+		<db:select doc:name="DataFromMYSQL" doc:id="9d8aadca-6c08-4577-b0bb-d6b8744e579b" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from employees]]></db:sql>
+		</db:select>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="71f0e3f9-4312-40de-abd0-d907c4fccdf2" type="ANY">
+				<set-payload value="#[vars.payload]" doc:name="MYSQL_Payload" doc:id="8733f211-748d-4dc7-921c-9a365d1a3ba3" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="InsertDataInMySQL" doc:id="5fa8f0e7-95bc-4d97-a900-1bf0a2da7b82" initialState="stopped">
+		<http:listener doc:name="Listener_MYSQLInsert" doc:id="7c4c30d1-f38c-4203-af43-6afcead2a527" config-ref="HTTP_Listener_config" path="/add"/>
+		<db:insert doc:name="InsertToMYSQL" doc:id="9d42c8c1-c2e2-4429-876e-84f9b6625d75" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO employees(EmpName,Designation,City,State,DateOfJoining,Salary,LastUpdatedDate) Values (:EmpName,:Designation,:City,:State,:DateOfJoining,:Salary,:LastUpdatedDate)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"Name": payload.Name,
+	"Designation" : payload.Designation,
+	"City" : payload.City,
+	"State" : payload.State,
+	"DateOfJoining" : payload.DateOfJoining,
+	"Salary" : payload.Salary,
+	"LastUpdatedDate" : payload.LastUpdateDate
+}]]]></db:input-parameters>
+		</db:insert>
+	</flow>
+	<flow name="GetDataFlow" doc:id="cb335335-1810-45ad-be61-f953ed8ba99b" >
+		<http:listener doc:name="GetDataListener" doc:id="30b04f3f-dea1-466a-9105-38c1b3b5acd0" config-ref="HTTP_Listener_config" path="/usecase"/>
+		<flow-ref doc:name="ToOIMtoSFMCflow" doc:id="d32e5dd9-06b4-4709-ba93-32da4843ca52" name="OIMtoSFMCFlow"/>
+	</flow>
+	<flow name="SMFC_System_API" doc:id="237d08eb-ab3d-42cd-809a-742fae4688ec" >
+		<http:listener doc:name="SFMC_Listener" doc:id="7367eec8-9cb1-48bb-ad0f-b4e5f65cfc0c" config-ref="HTTP_Listener_config" path="/SFMC"/>
+		<logger level="INFO" doc:name="SFMC_Logger" doc:id="d0eaf662-3726-4e85-b178-88ae7309e37d" message="#[payload]"/>
+		<ee:transform doc:name="OIMtoSFMCtransform" doc:id="30e60f0a-8510-45c1-9966-1243ec47dfca" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="1f427231-7133-4a66-8e0a-30e2a643ba12" >
+			<ee:transform doc:name="SFMCtransform" doc:id="311126b9-968d-49c3-b6c5-2c0ab109fc25">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	EmpName__c: payload.EmpName as String,
+	City__c: payload.City as String,
+	State__c: payload.State as String,
+    LastUpdatedDate__c: (payload.LastUpdatedDate as String {format: "uuuu-MM-dd"}) 
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<salesforce:create doc:id="ca479296-382e-4992-881b-0f195cb2908c" config-ref="Salesforce_Config" type="detailsem__c" doc:name="CreateRecord" />
+		</foreach>
+		<ee:transform doc:name="TransformToSalesforce" doc:id="2a5b7a8f-9f0b-4a7c-9f3a-a98dab25b3ff" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="2546bbe4-36b2-46c1-bba7-2bc0cd2fb7c9" type="ANY">
+				<set-payload value="#[vars.payload]" doc:name="SFMC_Set Payload" doc:id="de0a74ec-1528-4aee-8e63-0861a772cf99" />
+			</on-error-continue>
+		</error-handler>
+	
+</flow>
+</mule>

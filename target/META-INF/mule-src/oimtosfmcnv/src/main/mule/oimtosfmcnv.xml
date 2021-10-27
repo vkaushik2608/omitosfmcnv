@@ -18,7 +18,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 		<salesforce:basic-connection username="nikithashetty@apisero.com" password="Kajal1234@" securityToken="6fpAN6CB7gjva8pB4Bx50xRnG" />
 	</salesforce:sfdc-config>
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="c15a4cb7-3c26-4ec9-9246-4bb5cc278734">
-		<http:request-connection host="localhost" port="8081"/>
+		<http:request-connection host="localhost" port="8081" connectionIdleTimeout="3000000"/>
 	</http:request-config>
 	<flow name="GetDataFromMYSQL" doc:id="4b73f607-38f5-41ad-96a2-ee7619c5bb9f" >
 		<http:listener doc:name="Listener MYSQL" doc:id="468faf28-d2f7-47dd-a6e9-c4cbca8a63b6" config-ref="HTTP_Listener_config" path="/employees"/>

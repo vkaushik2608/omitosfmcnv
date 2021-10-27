@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="OIMtoSFMC-suite.xml" />
+	<munit:test name="InsertDataInMySQL-test" doc:id="ebb8dff5-1bbe-4a26-86ba-537c1b47a920" ignore="true">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="76b0f249-022f-42cc-a8e2-49c512c568af" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://InsertDataInMySQLtest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://InsertDataInMySQLtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to InsertDataInMySQL" doc:id="53e54586-191c-4aa7-80d4-19c4e991a72c" name="InsertDataInMySQL"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="a958bf23-ed1d-40d3-b2e9-34409a5d2317" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import InsertDataInMySQLtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Insert" doc:id="c94de019-6fbf-49c7-bb11-2177350d9d81" processor="db:insert" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9d42c8c1-c2e2-4429-876e-84f9b6625d75" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="SMFC_System_API-test" doc:id="6cdd4090-f305-42ee-8bff-5db205c5b2e7" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Create" doc:id="6c78524c-9386-4c48-8bdd-53546156b998" processor="salesforce:create">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ca479296-382e-4992-881b-0f195cb2908c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://SMFCSystemAPItest\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="5d4e137c-1936-45d4-aeb0-e8743caafaba" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://SMFCSystemAPItest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://SMFCSystemAPItest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to SMFC_System_API" doc:id="d0c307fa-f7f9-47cd-a560-2f74e26cca24" name="SMFC_System_API"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="c133b331-9a32-4d8b-838a-4a91fad757c6" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import SMFCSystemAPItest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="bf8c29c2-ffd7-4be8-a415-b3d439c9efd9" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d0eaf662-3726-4e85-b178-88ae7309e37d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Transform Message" doc:id="61c8371d-2674-43e0-a04f-123e66959b3d" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="311126b9-968d-49c3-b6c5-2c0ab109fc25" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Transform Message" doc:id="47cbeaf3-fca8-4b67-998a-bbb45e50c726" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="30e60f0a-8510-45c1-9966-1243ec47dfca" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Transform Message" doc:id="052f7190-d0e8-4de5-8502-c8f0e71f3329" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="2a5b7a8f-9f0b-4a7c-9f3a-a98dab25b3ff" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="GetDataFlow-test1" doc:id="ede8994a-b574-480c-849b-7881ea5b3389" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock ToOIMtoSFMCflow" doc:id="e3925d2f-e176-4565-a1a2-1a780a21301e" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d32e5dd9-06b4-4709-ba93-32da4843ca52" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://GetDataFlowtest1\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="LastRunSchedulerDate" value="#[output application/java --- readUrl('classpath://GetDataFlowtest1\mock_variable_.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="PayloadFromMySQL" value="#[output application/json --- readUrl('classpath://GetDataFlowtest1\mock_variable_1.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="fc1732d5-4370-40a0-8824-413fafaf5ad8" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://GetDataFlowtest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://GetDataFlowtest1\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to GetDataFlow" doc:id="9da48a70-4b36-4bb3-8d3b-61deeacb8337" name="GetDataFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="1b0f6add-122e-42d3-862b-920376cb1ea3" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import GetDataFlowtest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="OIMtoSFMCFlow-test-success" doc:id="3b16ff8a-4c6b-4329-97be-741d502748e9" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GetDataFromMySQL" doc:id="36d7f7d0-6855-4b6e-9901-6c420189f8da" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3cc36978-6deb-4937-8235-de945d8bad72" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://OIMtoSFMCFlowtestsuccess\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="cba95bf5-63c2-41d1-a168-4758552d72c6" >
+				<munit:payload value="#[readUrl('classpath://OIMtoSFMCFlowtestsuccess\set-event_payload.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to OIMtoSFMCFlow" doc:id="787bb559-b2c8-49ea-8b0e-47afa47d2038" name="OIMtoSFMCFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="1f8ad3c9-98df-418d-93e4-590dda8ea522" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import OIMtoSFMCFlowtestsuccess::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify SFMCrequest" doc:id="414c98f7-b5e4-4636-96c9-69d489a4fdc9" processor="http:request" times="6">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="be12017e-ed1d-4b3b-abff-64b500be3d18" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify OIMtoSFMC transform" doc:id="695571c8-cbb6-4683-9886-cff52620c945" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="47d4bae5-df03-4384-b6e6-e81ce2d5c28a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify RetrieveDateOfScheduler" doc:id="4b03a9cf-b3d2-473d-aef2-8f9e835293aa" processor="os:retrieve" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="740d228c-0fa7-4cd6-b1e4-fe7f75b3ad24" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="OIMtoSFMCFlow-test-secondtime" doc:id="aabf2dce-6f08-415e-bf1c-d1d053a60669" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GetDataFromMySQL" doc:id="f3c0762f-c1d0-4044-b540-df96b70f038c" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="3cc36978-6deb-4937-8235-de945d8bad72" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://OIMtoSFMCFlowtestsecondtime\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="ab920e51-b098-4cd2-8104-223611461ab6" >
+				<munit:payload value="#[readUrl('classpath://OIMtoSFMCFlowtestsecondtime\set-event_payload.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to OIMtoSFMCFlow" doc:id="fe9773aa-cdbe-4463-ada6-9976a01cb50e" name="OIMtoSFMCFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="cd066afd-6e6a-4a93-9bd0-634ff8d17783" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import OIMtoSFMCFlowtestsecondtime::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify SFMCrequest" doc:id="45c2e083-38fa-4c82-b245-b6a605643878" processor="http:request" times="6">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="be12017e-ed1d-4b3b-abff-64b500be3d18" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify OIMtoSFMC transform" doc:id="37187676-a7c6-43ca-92fa-fc16c2cf4735" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="47d4bae5-df03-4384-b6e6-e81ce2d5c28a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify RetrieveDateOfScheduler" doc:id="e7f7ea9c-8465-45d0-a190-6332b8a0d3a7" processor="os:retrieve" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="740d228c-0fa7-4cd6-b1e4-fe7f75b3ad24" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

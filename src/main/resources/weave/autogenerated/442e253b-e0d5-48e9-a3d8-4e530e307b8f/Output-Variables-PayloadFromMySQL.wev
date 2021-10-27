@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_442e253b_e0d5_48e9_a3d8_4e530e307b8f_Output_Variables_PayloadFromMySQL = Array<Any>
+
