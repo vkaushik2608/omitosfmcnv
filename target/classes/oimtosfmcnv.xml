@@ -21,8 +21,8 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 		<http:request-connection host="localhost" port="8081" connectionIdleTimeout="3000000"/>
 	</http:request-config>
 	<flow name="GetDataFromMYSQL" doc:id="4b73f607-38f5-41ad-96a2-ee7619c5bb9f" >
-		<http:listener doc:name="Listener MYSQL" doc:id="468faf28-d2f7-47dd-a6e9-c4cbca8a63b6" config-ref="HTTP_Listener_config" path="/employees"/>
-		<db:select doc:name="SelectDataFromMYSQL" doc:id="88cc88a8-38cd-4cb1-ae41-9999f3e96c05" config-ref="Database_Config">
+		<http:listener doc:name="Listener MYSQL" doc:id="468faf28-d2f7-47dd-a6e9-c4cbca8a63b6" config-ref="HTTP_Listener_config_1" path="/employees"/>
+		<db:select doc:name="SelectDataFromMYSQL" doc:id="88cc88a8-38cd-4cb1-ae41-9999f3e96c05" config-ref="Database_Config_1">
 			<db:sql ><![CDATA[select * from employees]]></db:sql>
 		</db:select>
 		<ee:transform doc:name="TransformDataOfMYSQL" doc:id="df0cc255-4eed-4f0b-a267-27fb479a86ac" >
@@ -35,8 +35,8 @@ payload]]></ee:set-payload>
 		</ee:transform>
 	</flow>
 	<flow name="InsertDataToMYSQL" doc:id="0dcf1b65-8b82-4b89-b74c-357d842fdc38" >
-		<http:listener doc:name="Listener" doc:id="8afde73c-b0be-4f1c-99a8-4b97c2b876a7" config-ref="HTTP_Listener_config" path="/add"/>
-		<db:insert doc:name="Insert" doc:id="bfe3452e-269a-440b-b3b8-5d4bbad01fef" config-ref="Database_Config">
+		<http:listener doc:name="Listener" doc:id="8afde73c-b0be-4f1c-99a8-4b97c2b876a7" config-ref="HTTP_Listener_config_1" path="/add"/>
+		<db:insert doc:name="Insert" doc:id="bfe3452e-269a-440b-b3b8-5d4bbad01fef" config-ref="Database_Config_1">
 			<db:sql ><![CDATA[INSERT INTO employees(EmpId,EmpName,Designation,City,State,DateOfJoining,Salary,LastUpdatedDate) 
 Values (:EmpId,:EmpName,:Designation,:City,:State,:DateOfJoining,:Salary,:LastUpdatedDate)]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
@@ -52,7 +52,7 @@ Values (:EmpId,:EmpName,:Designation,:City,:State,:DateOfJoining,:Salary,:LastUp
 		</db:insert>
 	</flow>
 	<flow name="SFMC-System-API" doc:id="7170ee42-7eae-48cd-9e46-bb0ac6179f84" >
-		<http:listener doc:name="Listener-SFMC" doc:id="93c26af6-1b2d-4623-a04b-8ff6b928b793" config-ref="HTTP_Listener_config" path="/SFMC"/>
+		<http:listener doc:name="Listener-SFMC" doc:id="93c26af6-1b2d-4623-a04b-8ff6b928b793" config-ref="HTTP_Listener_config_1" path="/SFMC"/>
 		<logger level="INFO" doc:name="SFMC Logger" doc:id="e5a5f5bb-2b92-4dd9-8800-ae9371fe6da4" />
 		<ee:transform doc:name="SFMC Transform Message" doc:id="7c7794db-e5c4-425f-a5fc-c09a27d45e84" >
 			<ee:message >
@@ -76,7 +76,7 @@ output application/json
 }]]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<salesforce:create doc:name="Create" doc:id="19d184e5-2947-4a38-bcff-c57f2dda1021" config-ref="Salesforce_Config" type="employee__c"/>
+		<salesforce:create doc:name="Create" doc:id="19d184e5-2947-4a38-bcff-c57f2dda1021" config-ref="Salesforce_Config_1" type="employee__c"/>
 		<ee:transform doc:name="Transform Message" doc:id="a7953212-4967-439d-9c5e-b7f61a99c27f" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -91,7 +91,7 @@ payload]]></ee:set-payload>
 			</on-error-continue>
 		</error-handler>
 	</flow>
-	<flow name="OIMtoSFMCFlow" doc:id="20f032b7-3b8b-4844-8cf5-2caa7880d47d" >
+	<flow name="OIMtoSFMCFlow_main" doc:id="20f032b7-3b8b-4844-8cf5-2caa7880d47d" >
 		<scheduler doc:name="OIMtoSFMC_Scheduler" doc:id="b03dcdff-95dc-42c3-97c4-a34633a1be0d" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="1" timeUnit="MINUTES" />
@@ -115,7 +115,7 @@ payload]]></ee:set-payload>
 			<choice doc:name="OIMtoSFMC_Choice" doc:id="fb23dadc-fa18-4afe-97b9-cc3b9432a4ef" >
 				<when expression='#[payload.LastUpdatedDate as String &lt; vars.LastRunSchedulerDate as String default ""]' >
 					<set-payload value="#[vars.PayloadFromMySQL]" doc:name="OIMtoSFMC" doc:id="cbd0662c-69e5-4da2-84e2-1e0b18508b5f" />
-					<http:request method="POST" doc:name="RequestToSFMC" doc:id="9abb7520-c726-48c5-90f2-e77d9aadf1ff" config-ref="HTTP_Request_configuration" path="/SFMC" />
+					<http:request method="POST" doc:name="RequestToSFMC" doc:id="9abb7520-c726-48c5-90f2-e77d9aadf1ff" config-ref="HTTP_Request_configuration_1" path="/SFMC" />
 				</when>
 				<otherwise >
 					<logger level="INFO" doc:name="OIMtoSFMC" doc:id="d5841737-20fb-4ea9-bf07-0cbaf0c4ee81" message="No Data" />
@@ -129,8 +129,8 @@ payload]]></ee:set-payload>
 		</error-handler>
 	</flow>
 	<flow name="GetDataFlow" doc:id="9162fa4c-3790-4810-be52-0b83e9e20853" >
-		<http:listener doc:name="GetData_Listener" doc:id="c1f18550-df51-4aed-bcee-f2ef0793c869" config-ref="HTTP_Listener_config" path="/usecase" />
-		<flow-ref doc:name="OIMtoSFMCflow" doc:id="4b3abae6-194e-452b-9cb1-e7c194102a52" name="OIMtoSFMCFlow" />
+		<http:listener doc:name="GetData_Listener" doc:id="c1f18550-df51-4aed-bcee-f2ef0793c869" config-ref="HTTP_Listener_config_1" path="/usecase" />
+		<flow-ref doc:name="OIMtoSFMCflow" doc:id="4b3abae6-194e-452b-9cb1-e7c194102a52" name="OIMtoSFMCFlow_main" />
 	</flow>
 	<flow name="SchedulerFlow" doc:id="d7acd94c-28f7-4652-9fe2-b6cc442d9edf" >
 		<scheduler doc:name="employeeData_Scheduler" doc:id="eb89f1e0-71d8-4c1f-81f3-b059fe51e705" >

@@ -12,19 +12,19 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="04867963-d577-43f6-aad8-7f99ee07f11b" >
+	<http:listener-config name="HTTP_Listener_config_1" doc:name="HTTP Listener config" doc:id="04867963-d577-43f6-aad8-7f99ee07f11b" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="8fbd3c00-40bb-413b-bf75-50d447ad0b61" >
+	<db:config name="Database_Config_1" doc:name="Database Config" doc:id="8fbd3c00-40bb-413b-bf75-50d447ad0b61" >
 		<db:my-sql-connection host="sql6.freesqldatabase.com" port="3306" user="sql6446637" password="ERgQNBk5Xr" database="sql6446637" />
 	</db:config>
-	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="09f0ca9c-252f-401c-ae8e-d766f0552dab" >
+	<salesforce:sfdc-config name="Salesforce_Config_1" doc:name="Salesforce Config" doc:id="09f0ca9c-252f-401c-ae8e-d766f0552dab" >
 		<salesforce:basic-connection username="nikithashetty@apisero.com" password="Kajal1234@" securityToken="Sx4aPuinec7ouHro1nzfzeHD0" />
 	</salesforce:sfdc-config>
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6d489670-4291-4ef2-8c7c-bc727be436c4">
+	<http:request-config name="HTTP_Request_configuration_1" doc:name="HTTP Request configuration" doc:id="6d489670-4291-4ef2-8c7c-bc727be436c4">
 		<http:request-connection port="8081" host="localhost"/>
 	</http:request-config>
-	<flow name="SchedulerFlow" doc:id="f8ba68f4-ed10-44f4-9a00-9a234b908b4d" >
+	<flow name="SchedulerFlow_1" doc:id="f8ba68f4-ed10-44f4-9a00-9a234b908b4d" >
 		<scheduler doc:name="Store_Scheduler" doc:id="e240bba4-1c18-41aa-87c3-e6ea911a107d" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="1" timeUnit="MINUTES"/>
@@ -63,7 +63,7 @@ payload]]></ee:set-payload>
 			<choice doc:name="Choice" doc:id="0f81fc32-f642-4915-ac48-573560013e40">
 			<when expression='#[payload.LastUpdatedDate as String &lt; vars.LastRunSchedulerDate as String default ""]'>
 				<set-payload value="#[vars.PayloadFromMySQL]" doc:name="OIMtoSFMCpayload" doc:id="25f6627b-4b9a-4aa7-a4a2-cc39176bc7c5" />
-				<http:request method="POST" doc:name="SFMCrequest" doc:id="be12017e-ed1d-4b3b-abff-64b500be3d18" config-ref="HTTP_Request_configuration" path="/SFMC" responseTimeout="50000">
+				<http:request method="POST" doc:name="SFMCrequest" doc:id="be12017e-ed1d-4b3b-abff-64b500be3d18" config-ref="HTTP_Request_configuration_1" path="/SFMC" responseTimeout="50000">
 				</http:request>
 			</when>
 			<otherwise>
@@ -78,8 +78,8 @@ payload]]></ee:set-payload>
 		</error-handler>
 	</flow>
 	<flow name="GetDataFromMySQL" doc:id="592804ae-e349-46d4-94be-d80974d825ac" >
-		<http:listener doc:name="GetDataFromMYSQL" doc:id="8a0e1046-474b-4fe2-a860-b9ab8bbbd79b" config-ref="HTTP_Listener_config" path="/mysqlData"/>
-		<db:select doc:name="DataFromMYSQL" doc:id="9d8aadca-6c08-4577-b0bb-d6b8744e579b" config-ref="Database_Config">
+		<http:listener doc:name="GetDataFromMYSQL" doc:id="8a0e1046-474b-4fe2-a860-b9ab8bbbd79b" config-ref="HTTP_Listener_config_1" path="/mysqlData"/>
+		<db:select doc:name="DataFromMYSQL" doc:id="9d8aadca-6c08-4577-b0bb-d6b8744e579b" config-ref="Database_Config_1">
 			<db:sql><![CDATA[select * from employees]]></db:sql>
 		</db:select>
 		<error-handler >
@@ -89,8 +89,8 @@ payload]]></ee:set-payload>
 		</error-handler>
 	</flow>
 	<flow name="InsertDataInMySQL" doc:id="5fa8f0e7-95bc-4d97-a900-1bf0a2da7b82" initialState="stopped">
-		<http:listener doc:name="Listener_MYSQLInsert" doc:id="7c4c30d1-f38c-4203-af43-6afcead2a527" config-ref="HTTP_Listener_config" path="/add"/>
-		<db:insert doc:name="InsertToMYSQL" doc:id="9d42c8c1-c2e2-4429-876e-84f9b6625d75" config-ref="Database_Config">
+		<http:listener doc:name="Listener_MYSQLInsert" doc:id="7c4c30d1-f38c-4203-af43-6afcead2a527" config-ref="HTTP_Listener_config_1" path="/add"/>
+		<db:insert doc:name="InsertToMYSQL" doc:id="9d42c8c1-c2e2-4429-876e-84f9b6625d75" config-ref="Database_Config_1">
 			<db:sql ><![CDATA[INSERT INTO employees(EmpName,Designation,City,State,DateOfJoining,Salary,LastUpdatedDate) Values (:EmpName,:Designation,:City,:State,:DateOfJoining,:Salary,:LastUpdatedDate)]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
 	"Name": payload.Name,
@@ -103,12 +103,12 @@ payload]]></ee:set-payload>
 }]]]></db:input-parameters>
 		</db:insert>
 	</flow>
-	<flow name="GetDataFlow" doc:id="cb335335-1810-45ad-be61-f953ed8ba99b" >
-		<http:listener doc:name="GetDataListener" doc:id="30b04f3f-dea1-466a-9105-38c1b3b5acd0" config-ref="HTTP_Listener_config" path="/usecase"/>
-		<flow-ref doc:name="ToOIMtoSFMCflow" doc:id="d32e5dd9-06b4-4709-ba93-32da4843ca52" name="OIMtoSFMCFlow"/>
+	<flow name="GetDataFlow_1" doc:id="cb335335-1810-45ad-be61-f953ed8ba99b" >
+		<http:listener doc:name="GetDataListener" doc:id="30b04f3f-dea1-466a-9105-38c1b3b5acd0" config-ref="HTTP_Listener_config_1" path="/usecase"/>
+		<flow-ref doc:name="ToOIMtoSFMCflow" doc:id="d32e5dd9-06b4-4709-ba93-32da4843ca52" name="OIMtoSFMCFlow_main"/>
 	</flow>
 	<flow name="SMFC_System_API" doc:id="237d08eb-ab3d-42cd-809a-742fae4688ec" >
-		<http:listener doc:name="SFMC_Listener" doc:id="7367eec8-9cb1-48bb-ad0f-b4e5f65cfc0c" config-ref="HTTP_Listener_config" path="/SFMC"/>
+		<http:listener doc:name="SFMC_Listener" doc:id="7367eec8-9cb1-48bb-ad0f-b4e5f65cfc0c" config-ref="HTTP_Listener_config_1" path="/SFMC"/>
 		<logger level="INFO" doc:name="SFMC_Logger" doc:id="d0eaf662-3726-4e85-b178-88ae7309e37d" message="#[payload]"/>
 		<ee:transform doc:name="OIMtoSFMCtransform" doc:id="30e60f0a-8510-45c1-9966-1243ec47dfca" >
 			<ee:message >
@@ -132,7 +132,7 @@ output application/java
 }]]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-			<salesforce:create doc:id="ca479296-382e-4992-881b-0f195cb2908c" config-ref="Salesforce_Config" type="detailsem__c" doc:name="CreateRecord" />
+			<salesforce:create doc:id="ca479296-382e-4992-881b-0f195cb2908c" config-ref="Salesforce_Config_1" type="detailsem__c" doc:name="CreateRecord" />
 		</foreach>
 		<ee:transform doc:name="TransformToSalesforce" doc:id="2a5b7a8f-9f0b-4a7c-9f3a-a98dab25b3ff" >
 			<ee:message >
